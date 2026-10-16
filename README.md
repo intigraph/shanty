@@ -208,6 +208,8 @@ just install    # copies the binary to ~/.local/bin
 
 ### Binary releases
 
+Maintainers: see the [release PR process](docs/releases.md).
+
 Pre-built binaries for Linux and macOS (amd64 and arm64) are on the
 [Releases](https://github.com/scbrown/shanty/releases) page.
 

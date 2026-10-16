@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Release versions and tags are proposed through reviewed release PRs; the
+  existing tested binary publisher handles their tags.
+
 ### Fixed
 
 - Failed shantytown status reads back off for 15 seconds while continuing to
