@@ -17,9 +17,12 @@ the manifest does not change local development version reporting.
 
 An owner must configure the repository Actions secret `RELEASE_PLEASE_TOKEN`.
 Use an automation identity with access only to this repository and the rights to
-write contents, pull requests and issues (release labels). Repository Actions
+write contents and pull requests. Set an explicit expiry. Repository Actions
 must allow creating pull requests. Keep the credential in Actions secrets;
 never commit it or print its value. Revoke/rotate it through its owner.
+From the reviewed checkout, run `bash scripts/configure-release-token.sh` and
+paste once at the hidden prompt. The script reads stdin, sets only the named
+repository secret, then verifies its NAME exists. It never prints the value.
 
 The default `GITHUB_TOKEN` deliberately is **not** a fallback. GitHub suppresses
 new workflow runs for PR/tag events created with that token, which would leave
