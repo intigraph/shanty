@@ -1,0 +1,13 @@
+{
+  "$schema": "https://raw.githubusercontent.com/googleapis/release-please/main/schemas/config.json",
+  "release-type": "go",
+  "include-component-in-tag": false,
+  "draft": true,
+  "force-tag-creation": true,
+  "bootstrap-sha": "4549b4b920330804c5202a8fe50f0b5476cfe293",
+  "packages": {
+    ".": {
+      "package-name": "shanty"
+    }
+  }
+}
