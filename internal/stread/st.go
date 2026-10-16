@@ -36,6 +36,7 @@ package stread
 import (
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"os"
@@ -157,10 +158,9 @@ func workDir() string {
 // perfectly clear answer.
 //
 // The answer is cached on disk for CacheTTL, keyed by the binary, the working
-// directory, and the arguments — everything that can change the result. Only a
-// SUCCESSFUL answer is cached: caching a failure would pin a transient error in
-// place for the whole TTL, and the loud states callers render are meant to track
-// reality.
+// directory, and the arguments. Failures use a separate bounded backoff entry:
+// callers still receive the original output and an error, never an empty success.
+// Cache hits do not extend the deadline; expiry attempts a fresh command.
 func Run(args ...string) (string, error) {
 	bin := Bin()
 	if bin == "" {
@@ -168,6 +168,12 @@ func Run(args ...string) (string, error) {
 	}
 	dir := workDir()
 	key := cacheKey(bin, dir, args)
+	if raw, ok := cacheGet(key + ".failure"); ok {
+		var failure cachedFailure
+		if json.Unmarshal([]byte(raw), &failure) == nil && failure.Error != "" {
+			return failure.Output, errors.New(failure.Error)
+		}
+	}
 	if v, ok := cacheGet(key); ok {
 		return v, nil
 	}
@@ -178,12 +184,19 @@ func Run(args ...string) (string, error) {
 	val := strings.TrimSpace(string(out))
 	if err != nil {
 		var ee *exec.ExitError
+		var reported error
 		if errors.As(err, &ee) && len(ee.Stderr) > 0 {
-			return val, fmt.Errorf("st %s: %w: %s",
-				strings.Join(args, " "), err, firstLine(ee.Stderr))
+			reported = fmt.Errorf("st %s: %w: %s", strings.Join(args, " "), err, firstLine(ee.Stderr))
+		} else {
+			reported = fmt.Errorf("st %s: %w", strings.Join(args, " "), err)
 		}
-		return val, fmt.Errorf("st %s: %w", strings.Join(args, " "), err)
+		if raw, marshalErr := json.Marshal(cachedFailure{Output: val, Error: reported.Error()}); marshalErr == nil {
+			cacheSet(key+".failure", string(raw))
+		}
+		cacheRemove(key)
+		return val, reported
 	}
+	cacheRemove(key + ".failure")
 	cacheSet(key, val)
 	return val, nil
 }
@@ -298,5 +311,21 @@ func cacheSet(key, val string) {
 	}
 	if os.Rename(name, filepath.Join(dir, key)) != nil {
 		os.Remove(name)
+	}
+}
+
+// A cached failure remains a failure. Its age is bounded by CacheTTL just like
+// successful answers, and reading it never refreshes its modification time.
+type cachedFailure struct {
+	Output string `json:"output"`
+	Error  string `json:"error"`
+}
+
+func cacheRemove(key string) {
+	if cacheDisabled() {
+		return
+	}
+	if dir := cacheDir(); dir != "" {
+		_ = os.Remove(filepath.Join(dir, key))
 	}
 }
