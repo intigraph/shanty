@@ -9,15 +9,14 @@ import (
 
 // StatusBarConfig holds the status bar layout.
 type StatusBarConfig struct {
-	Left  []string
-	Right []string
+	Left  []string `toml:"left"`
+	Right []string `toml:"right"`
 }
 
 // DefaultStatusBar returns the default status bar segment layout.
 //
-// The left pill is IDENTITY: the crew member's mark and name, at the one spot the
-// eye already goes. That is what makes a wall of panes tellable apart without
-// reading.
+// The session pill names the crew member. RenderStatusBar protects the role and
+// verdict by placing a selected crewid first on the left, before that pill.
 //
 // The right side leads with the shantytown segments because they are the ones
 // that want you to act — who this is and what state they are in, what they hold,
@@ -53,13 +52,16 @@ func RenderStatusBar(theme Theme, cfg StatusBarConfig) string {
 	out += "set-option -g status-interval 5\n"
 	out += fmt.Sprintf("set-option -g status-style 'bg=%s,fg=%s'\n", theme.BG, theme.FG)
 
-	// Left status — segments rendered via shanty seg calls
-	left := renderSegmentCalls(cfg.Left)
+	// tmux clips status-right from the left. Keep the role/verdict at the
+	// beginning of status-left whenever crewid is selected, ahead of even a
+	// long session name. Other user-selected segments keep their order.
+	leftNames, rightNames := protectCrewID(cfg)
+	left := renderSegmentCalls(leftNames)
 	out += fmt.Sprintf("set-option -g status-left '%s '\n", left)
-	out += "set-option -g status-left-length 30\n"
+	out += "set-option -g status-left-length 60\n"
 
 	// Right status — dynamic segments via shanty seg
-	right := renderSegmentCalls(cfg.Right)
+	right := renderSegmentCalls(rightNames)
 	out += fmt.Sprintf("set-option -g status-right '%s '\n", right)
 	out += fmt.Sprintf("set-option -g status-right-length %d\n", StatusRightLength)
 
@@ -69,6 +71,30 @@ func RenderStatusBar(theme Theme, cfg StatusBarConfig) string {
 	out += fmt.Sprintf("set-option -g window-status-style 'fg=%s,bg=%s'\n", theme.FG, theme.StatusBG)
 
 	return out
+}
+
+// protectCrewID works on copies: rendering must not mutate caller choices.
+func protectCrewID(cfg StatusBarConfig) ([]string, []string) {
+	left, right := []string{}, []string{}
+	hasCrewID := false
+	for _, name := range cfg.Left {
+		if name == "crewid" {
+			hasCrewID = true
+		} else {
+			left = append(left, name)
+		}
+	}
+	for _, name := range cfg.Right {
+		if name == "crewid" {
+			hasCrewID = true
+		} else {
+			right = append(right, name)
+		}
+	}
+	if hasCrewID {
+		left = append([]string{"crewid"}, left...)
+	}
+	return left, right
 }
 
 // perAgentSegments read a shantytown identity ($SHANTY_AGENT, else the session).

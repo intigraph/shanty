@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 
 	"github.com/scbrown/shanty/internal/config"
+	"github.com/scbrown/shanty/internal/segments"
 )
 
 // GenerateConfig creates a shanty tmux configuration file and returns its path.
@@ -22,6 +23,11 @@ func GenerateConfig() (string, error) {
 	confDir, err := configDir()
 	if err != nil {
 		return "", err
+	}
+
+	status, err := config.LoadStatusBar(filepath.Join(confDir, "config.toml"), segments.AllNames())
+	if err != nil {
+		return "", fmt.Errorf("loading status layout: %w", err)
 	}
 
 	confPath := filepath.Join(confDir, "tmux.conf")
@@ -65,7 +71,7 @@ func GenerateConfig() (string, error) {
 	fmt.Fprintln(f, config.RenderKeybindings(config.DefaultKeybindings()))
 
 	// Status bar
-	fmt.Fprintln(f, config.RenderStatusBar(theme, config.DefaultStatusBar()))
+	fmt.Fprintln(f, config.RenderStatusBar(theme, status))
 
 	return confPath, nil
 }
