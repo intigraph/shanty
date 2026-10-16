@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Persistent `[status]` left/right segment choices in `config.toml`, retained
+  across regeneration. Selected crew identity renders first on the left so a
+  long right-hand bar does not clip away its role.
+
 ### Fixed
 
 - Failed shantytown status reads back off for 15 seconds while continuing to

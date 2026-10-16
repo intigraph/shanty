@@ -1,0 +1,17 @@
+Script started on 2026-10-16 08:30:16-04:00 [COMMAND="uv run --no-project --with pyte python docs/demos/status-layout/run.py" <not executed on terminal>]
+[
+  {
+    "source": "baseline",
+    "width": 170,
+    "role_visible": false,
+    "status_row": "fixture-agent XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  {
+    "source": "candidate",
+    "width": 170,
+    "role_visible": true,
+    "status_row": "ROLE:lead BUSY settings:STALE fixture-agent XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  }
+]
+
+Script done on 2026-10-16 08:30:20-04:00 [COMMAND_EXIT_CODE="0"]
