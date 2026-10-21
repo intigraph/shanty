@@ -5,7 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/scbrown/shanty/internal/config"
+	"github.com/intigraph/shanty/internal/config"
 )
 
 // GenerateConfig creates a shanty tmux configuration file and returns its path.

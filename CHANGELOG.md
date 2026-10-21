@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Move the Go module, build linker paths, and installation links to
+  `github.com/intigraph/shanty`. Previously published module tags stay unchanged.
+
 ### Fixed
 
 - Failed shantytown status reads back off for 15 seconds while continuing to

@@ -4,7 +4,7 @@ import (
 	"sort"
 	"sync"
 
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 // CrewRow is one enriched line of the session picker: a session name joined with

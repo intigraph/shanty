@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/stread"
 
-	"github.com/scbrown/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/crewid"
 )
 
 // fakeST installs a stub `st` that answers from the given canned replies, keyed by

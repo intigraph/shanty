@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"sort"
 
-	"github.com/scbrown/shanty/internal/crewid"
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/stread"
 	"github.com/spf13/cobra"
 )
 

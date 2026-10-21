@@ -13,9 +13,9 @@ builds:
       - arm64
     ldflags:
       - -s -w
-      - -X github.com/scbrown/shanty/internal/cmd.Version={{.Version}}
-      - -X github.com/scbrown/shanty/internal/cmd.Commit={{.Commit}}
-      - -X github.com/scbrown/shanty/internal/cmd.BuildTime={{.Date}}
+      - -X github.com/intigraph/shanty/internal/cmd.Version={{.Version}}
+      - -X github.com/intigraph/shanty/internal/cmd.Commit={{.Commit}}
+      - -X github.com/intigraph/shanty/internal/cmd.BuildTime={{.Date}}
 
 archives:
   - formats: [tar.gz]

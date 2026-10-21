@@ -6,8 +6,8 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/crewid"
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 // Session renders WHO this pane belongs to as the bar's leftmost pill: the crew

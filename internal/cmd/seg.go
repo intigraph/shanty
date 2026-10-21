@@ -5,7 +5,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/segments"
+	"github.com/intigraph/shanty/internal/segments"
 	"github.com/spf13/cobra"
 )
 
