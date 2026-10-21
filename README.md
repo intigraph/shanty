@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"/></a>
   <a href="https://go.dev"><img src="https://img.shields.io/badge/Go-1.24+-00ADD8.svg" alt="Go 1.24+"/></a>
   <a href="https://draculatheme.com/"><img src="https://img.shields.io/badge/theme-Dracula-bd93f9.svg" alt="Dracula theme"/></a>
   <a href="docs/src/SUMMARY.md"><img src="https://img.shields.io/badge/docs-mdbook-green.svg" alt="Documentation"/></a>
@@ -423,4 +423,4 @@ just check      # fmt-check + lint + test
 
 ## License
 
-[MIT](LICENSE)
+[Apache-2.0](LICENSE)
