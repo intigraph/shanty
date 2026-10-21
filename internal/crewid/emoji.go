@@ -26,7 +26,7 @@ import (
 	"syscall"
 
 	"github.com/BurntSushi/toml"
-	"github.com/scbrown/shanty/internal/config"
+	"github.com/intigraph/shanty/internal/config"
 )
 
 // Palette is the pool marks are drawn from, in assignment order.

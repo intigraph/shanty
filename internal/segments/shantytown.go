@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/crewid"
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 // sessionName is the tmux session the segment is being drawn in, set by the seg

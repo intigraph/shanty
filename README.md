@@ -169,7 +169,7 @@ turns into a fork bomb.
 **1. Install**
 
 ```bash
-go install github.com/scbrown/shanty/cmd/shanty@latest
+go install github.com/intigraph/shanty/cmd/shanty@latest
 ```
 
 **2. Run**
@@ -190,7 +190,7 @@ to configure.
 ### From source (go install)
 
 ```bash
-go install github.com/scbrown/shanty/cmd/shanty@latest
+go install github.com/intigraph/shanty/cmd/shanty@latest
 ```
 
 The binary lands in `$GOPATH/bin` (usually `~/go/bin`) — make sure that's on your `PATH`.
@@ -200,7 +200,7 @@ The binary lands in `$GOPATH/bin` (usually `~/go/bin`) — make sure that's on y
 Requires Go 1.24+ and tmux.
 
 ```bash
-git clone https://github.com/scbrown/shanty.git
+git clone https://github.com/intigraph/shanty.git
 cd shanty
 just build      # or: go build -o shanty ./cmd/shanty
 just install    # copies the binary to ~/.local/bin
@@ -209,7 +209,7 @@ just install    # copies the binary to ~/.local/bin
 ### Binary releases
 
 Pre-built binaries for Linux and macOS (amd64 and arm64) are on the
-[Releases](https://github.com/scbrown/shanty/releases) page.
+[Releases](https://github.com/intigraph/shanty/releases) page.
 
 ### Runtime dependency
 
