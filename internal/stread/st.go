@@ -177,6 +177,20 @@ func Run(args ...string) (string, error) {
 	if v, ok := cacheGet(key); ok {
 		return v, nil
 	}
+	val, reported := runCommand(bin, dir, args)
+	if reported != nil {
+		if raw, marshalErr := json.Marshal(cachedFailure{Output: val, Error: reported.Error()}); marshalErr == nil {
+			cacheSet(key+".failure", string(raw))
+		}
+		cacheRemove(key)
+		return val, reported
+	}
+	cacheRemove(key + ".failure")
+	cacheSet(key, val)
+	return val, nil
+}
+
+func runCommand(bin, dir string, args []string) (string, error) {
 	cmd := exec.Command(bin, args...)
 	cmd.Dir = dir
 	cmd.Env = childEnv(bin)
@@ -190,14 +204,8 @@ func Run(args ...string) (string, error) {
 		} else {
 			reported = fmt.Errorf("st %s: %w", strings.Join(args, " "), err)
 		}
-		if raw, marshalErr := json.Marshal(cachedFailure{Output: val, Error: reported.Error()}); marshalErr == nil {
-			cacheSet(key+".failure", string(raw))
-		}
-		cacheRemove(key)
 		return val, reported
 	}
-	cacheRemove(key + ".failure")
-	cacheSet(key, val)
 	return val, nil
 }
 
