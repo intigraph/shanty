@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/scbrown/shanty/internal/session"
+	"github.com/intigraph/shanty/internal/session"
 	"github.com/spf13/cobra"
 )
 

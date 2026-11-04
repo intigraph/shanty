@@ -13,7 +13,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   across regeneration. Selected crew identity renders first on the left so a
   long right-hand bar does not clip away its role.
 
+### Changed
+
+- Move the Go module, build linker paths, and installation links to
+  `github.com/intigraph/shanty`. Previously published module tags stay unchanged.
+
 ### Fixed
+
+- Share inbox status counts and failures for at most one minute across tmux
+  renders, with one refresh at a time per owner and routing scope. Unknown
+  answers remain visible; interactive inbox commands are unaffected.
 
 - Failed shantytown status reads back off for 15 seconds while continuing to
   report an error. Repeated bar renders no longer launch a new failed command

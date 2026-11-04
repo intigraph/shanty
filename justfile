@@ -1,5 +1,5 @@
 # Shanty — terminal multiplexer with Dracula theme
-# https://github.com/scbrown/shanty
+# https://github.com/intigraph/shanty
 
 binary := "shanty"
 install_dir := env("HOME") / ".local/bin"
@@ -8,7 +8,7 @@ version := `git describe --tags --always --dirty 2>/dev/null || echo "dev"`
 commit := `git rev-parse --short HEAD 2>/dev/null || echo "unknown"`
 build_time := `date -u +"%Y-%m-%dT%H:%M:%SZ"`
 
-ldflags := "-X github.com/scbrown/shanty/internal/cmd.Version=" + version + " -X github.com/scbrown/shanty/internal/cmd.Commit=" + commit + " -X github.com/scbrown/shanty/internal/cmd.BuildTime=" + build_time
+ldflags := "-X github.com/intigraph/shanty/internal/cmd.Version=" + version + " -X github.com/intigraph/shanty/internal/cmd.Commit=" + commit + " -X github.com/intigraph/shanty/internal/cmd.BuildTime=" + build_time
 
 # Build the shanty binary
 build:
