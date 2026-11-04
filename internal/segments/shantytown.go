@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/crewid"
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 // sessionName is the tmux session the segment is being drawn in, set by the seg
@@ -509,7 +509,7 @@ func (Inbox) Render() string {
 	}
 	// --count is a pure read: it never marks anything read, so polling it from the
 	// status bar cannot destroy unread state.
-	count, err := stread.Run("inbox", "--count", agent)
+	count, err := stread.RunInboxCount(agent)
 	if err != nil {
 		return loud("inbox?")
 	}

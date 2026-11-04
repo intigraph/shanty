@@ -1,4 +1,4 @@
-module github.com/scbrown/shanty
+module github.com/intigraph/shanty
 
 go 1.24.2
 

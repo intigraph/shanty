@@ -7,8 +7,8 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/crewid"
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/crewid"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 const sessionPrefix = "shanty-"

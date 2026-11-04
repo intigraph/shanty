@@ -81,4 +81,4 @@ Segments are registered in a global `Registry` map. The `seg` subcommand looks u
 
 ### Caching
 
-Segments that call external commands (e.g., the shantytown segments) share a cache with a 15-second TTL. The cache lives **on disk**, not in memory: every `#(shanty seg …)` is its own short-lived process, so a process-local cache is never hit twice and each render paid full price. Only successful answers are cached — pinning a failure for the whole TTL would make the segments' visible error states lag reality.
+Segments that call external commands share an on-disk cache: each `#(shanty seg …)` runs in a new process. Most st reads reuse successes and failures for 15 seconds. The display-only inbox count uses a 60-second cache and a nonblocking cross-process refresh lock; a competing refresh or unavailable cache renders UNKNOWN, never an empty inbox. A hit does not extend expiry. Inbox entries are isolated by owner, working directory, executable identity and routing environment. Interactive inbox commands are unaffected.

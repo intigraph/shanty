@@ -7,7 +7,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/stread"
 )
 
 // Usage renders BOTH Claude usage budgets and the throttle tier in force.

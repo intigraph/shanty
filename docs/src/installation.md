@@ -5,7 +5,7 @@
 The simplest way to install shanty:
 
 ```bash
-go install github.com/scbrown/shanty/cmd/shanty@latest
+go install github.com/intigraph/shanty/cmd/shanty@latest
 ```
 
 This places the binary in your `$GOPATH/bin` (usually `~/go/bin`). Make sure this directory is in your `PATH`.
@@ -15,7 +15,7 @@ This places the binary in your `$GOPATH/bin` (usually `~/go/bin`). Make sure thi
 Clone the repository and build:
 
 ```bash
-git clone https://github.com/scbrown/shanty.git
+git clone https://github.com/intigraph/shanty.git
 cd shanty
 just build
 ```
@@ -34,7 +34,7 @@ just install
 
 ## Binary releases
 
-Pre-built binaries for Linux and macOS (amd64 and arm64) are available on the [Releases](https://github.com/scbrown/shanty/releases) page.
+Pre-built binaries for Linux and macOS (amd64 and arm64) are available on the [Releases](https://github.com/intigraph/shanty/releases) page.
 
 Download the appropriate archive, extract it, and place the `shanty` binary somewhere in your `PATH`.
 
