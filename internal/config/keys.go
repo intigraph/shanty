@@ -42,8 +42,11 @@ func DefaultKeybindings() []Keybinding {
 func SessionPickerBinding() string {
 	return "# Session switcher: type to fuzzy-filter, most recently used first.\n" +
 		"# Without fzf this falls back to tmux's stock session tree.\n" +
+		"# -EE, not -E: close the popup only when pick exits 0 (a pick or Esc). An error\n" +
+		"# such as \"no other sessions to switch to\" then stays on screen until a key,\n" +
+		"# instead of flashing and vanishing with no explanation.\n" +
 		"bind-key s if-shell 'command -v fzf >/dev/null 2>&1' " +
-		"{ display-popup -E -w 60% -h 60% '" + selfPath() + " pick' } " +
+		"{ display-popup -EE -w 60% -h 60% '" + selfPath() + " pick' } " +
 		"{ choose-tree -Zs }\n"
 }
 

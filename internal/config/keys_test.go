@@ -25,7 +25,7 @@ func TestSessionPickerDoesNotDependOnPath(t *testing.T) {
 	if strings.Contains(out, "'shanty pick'") {
 		t.Errorf("picker must not rely on PATH: want an absolute shanty path, got:\n%s", out)
 	}
-	if !strings.Contains(out, "-E -w") || !strings.Contains(out, "display-popup") {
+	if !strings.Contains(out, "-EE -w") || !strings.Contains(out, "display-popup") {
 		t.Errorf("expected the picker to run in a popup, got:\n%s", out)
 	}
 }
@@ -51,5 +51,17 @@ func TestSessionPickerFallsBackToChooseTree(t *testing.T) {
 	tree := strings.Index(out, "choose-tree")
 	if pick < 0 || tree < 0 || pick > tree {
 		t.Errorf("expected the popup as the true branch and choose-tree as the fallback, got:\n%s", out)
+	}
+}
+
+// A picker error must stay readable. With -E the popup closes the instant pick
+// exits, so "no other sessions to switch to" (exit 1) showed as a flash and nothing
+// else: Stiwi, 2026-10-01, "it flashes and disappears". -EE closes only on exit 0,
+// and pick returns 0 on a successful switch AND on Esc, so the normal paths still
+// close by themselves.
+func TestSessionPickerKeepsErrorsOnScreen(t *testing.T) {
+	out := SessionPickerBinding()
+	if !strings.Contains(out, "display-popup -EE ") {
+		t.Errorf("expected display-popup -EE so a pick error stays visible, got:\n%s", out)
 	}
 }
