@@ -220,11 +220,16 @@ that outgrows it gets no mark rather than a duplicate one.
 
 ## Caching
 
-Every `#(shanty seg …)` is its own short-lived process, so a process-local cache
-would never be hit — each render paid full price for every segment. Answers from
-external commands are therefore cached **on disk**, shared across every segment
-process, keyed by the binary, its working directory and its arguments. Only
-successful answers are cached: pinning a failure for the whole TTL would make the
-loud states above lag reality.
+Every `#(shanty seg …)` is its own short-lived process. External command
+answers therefore share an on-disk cache, normally for 15 seconds. Failures
+remain failures during that bounded backoff; reading an entry never renews it.
+
+The inbox **display** reuses counts and errors for at most 60 seconds. Its key
+includes the owner, working directory, executable identity and routing
+environment. A nonblocking process lock permits one refresh per key; other
+renders show an unknown state while it runs. Invalid counts, unsupported locks
+or an unavailable cache also remain unknown. The next render after expiry
+attempts a fresh read. This never lists, acknowledges or drains messages.
+`SHANTY_SEG_NOCACHE` bypasses caching for diagnostics.
 
 System segments that read `/proc` are not cached; those reads are fast.

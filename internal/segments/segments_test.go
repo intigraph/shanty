@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/scbrown/shanty/internal/stread"
+	"github.com/intigraph/shanty/internal/stread"
 	"runtime"
 )
 

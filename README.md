@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue.svg" alt="License: MIT"/></a>
+  <a href="LICENSE"><img src="https://img.shields.io/badge/License-Apache_2.0-blue.svg" alt="License: Apache-2.0"/></a>
   <a href="https://go.dev"><img src="https://img.shields.io/badge/Go-1.24+-00ADD8.svg" alt="Go 1.24+"/></a>
   <a href="https://draculatheme.com/"><img src="https://img.shields.io/badge/theme-Dracula-bd93f9.svg" alt="Dracula theme"/></a>
   <a href="docs/src/SUMMARY.md"><img src="https://img.shields.io/badge/docs-mdbook-green.svg" alt="Documentation"/></a>
@@ -169,7 +169,7 @@ turns into a fork bomb.
 **1. Install**
 
 ```bash
-go install github.com/scbrown/shanty/cmd/shanty@latest
+go install github.com/intigraph/shanty/cmd/shanty@latest
 ```
 
 **2. Run**
@@ -190,7 +190,7 @@ to configure.
 ### From source (go install)
 
 ```bash
-go install github.com/scbrown/shanty/cmd/shanty@latest
+go install github.com/intigraph/shanty/cmd/shanty@latest
 ```
 
 The binary lands in `$GOPATH/bin` (usually `~/go/bin`) — make sure that's on your `PATH`.
@@ -200,7 +200,7 @@ The binary lands in `$GOPATH/bin` (usually `~/go/bin`) — make sure that's on y
 Requires Go 1.24+ and tmux.
 
 ```bash
-git clone https://github.com/scbrown/shanty.git
+git clone https://github.com/intigraph/shanty.git
 cd shanty
 just build      # or: go build -o shanty ./cmd/shanty
 just install    # copies the binary to ~/.local/bin
@@ -209,7 +209,7 @@ just install    # copies the binary to ~/.local/bin
 ### Binary releases
 
 Pre-built binaries for Linux and macOS (amd64 and arm64) are on the
-[Releases](https://github.com/scbrown/shanty/releases) page.
+[Releases](https://github.com/intigraph/shanty/releases) page.
 
 ### Runtime dependency
 
@@ -423,4 +423,4 @@ just check      # fmt-check + lint + test
 
 ## License
 
-[MIT](LICENSE)
+[Apache-2.0](LICENSE)

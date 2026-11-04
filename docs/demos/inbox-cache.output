@@ -1,0 +1,47 @@
+Script started on 2026-10-23 10:02:33-04:00 [COMMAND="python3 render-probe.py" <not executed on terminal>]
+[
+  {
+    "binary": "installed",
+    "answer": "7",
+    "exit": "0",
+    "renders": 12,
+    "backend_calls": 4
+  },
+  {
+    "binary": "installed",
+    "answer": "0",
+    "exit": "0",
+    "renders": 12,
+    "backend_calls": 4
+  },
+  {
+    "binary": "installed",
+    "answer": "partial",
+    "exit": "2",
+    "renders": 12,
+    "backend_calls": 12
+  },
+  {
+    "binary": "candidate",
+    "answer": "7",
+    "exit": "0",
+    "renders": 12,
+    "backend_calls": 1
+  },
+  {
+    "binary": "candidate",
+    "answer": "0",
+    "exit": "0",
+    "renders": 12,
+    "backend_calls": 1
+  },
+  {
+    "binary": "candidate",
+    "answer": "partial",
+    "exit": "2",
+    "renders": 12,
+    "backend_calls": 1
+  }
+]
+
+Script done on 2026-10-23 10:02:34-04:00 [COMMAND_EXIT_CODE="0"]
