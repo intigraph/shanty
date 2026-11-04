@@ -14,6 +14,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Keep session-picker errors visible in the popup until dismissed, while
+  successful selections and cancellation continue to close it automatically.
+
 - Share inbox status counts and failures for at most one minute across tmux
   renders, with one refresh at a time per owner and routing scope. Unknown
   answers remain visible; interactive inbox commands are unaffected.
