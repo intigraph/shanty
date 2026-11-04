@@ -1,5 +1,9 @@
 version: 2
 
+# Release Please creates the draft and tag; upload to and publish that draft.
+release:
+  use_existing_draft: true
+
 builds:
   - main: ./cmd/shanty
     binary: shanty

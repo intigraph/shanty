@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Release versions and tags are proposed through reviewed release PRs; the
+  existing tested binary publisher handles their tags.
+
 - Move the Go module, build linker paths, and installation links to
   `github.com/intigraph/shanty`. Previously published module tags stay unchanged.
 
