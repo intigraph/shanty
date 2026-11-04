@@ -206,6 +206,11 @@ just build      # or: go build -o shanty ./cmd/shanty
 just install    # copies the binary to ~/.local/bin
 ```
 
+### Status layout
+
+Choose status segments persistently in `~/.config/shanty/config.toml`; see
+[status configuration](docs/src/configuration.md#persistent-status-segments).
+
 ### Binary releases
 
 Maintainers: see the [release PR process](docs/releases.md).

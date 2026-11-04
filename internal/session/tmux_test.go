@@ -2,6 +2,7 @@ package session
 
 import (
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -131,5 +132,60 @@ func TestGenerateConfigWritesFile(t *testing.T) {
 	}
 	if info.Size() == 0 {
 		t.Error("expected non-empty config file")
+	}
+}
+
+func TestGenerateConfigPreservesUserSegmentsAcrossRegeneration(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	dir, err := configDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	path := filepath.Join(dir, "config.toml")
+	body := "[status]\nleft=['session','crewid']\nright=['task','cpu','clock']\n"
+	if err := os.WriteFile(path, []byte(body), 0600); err != nil {
+		t.Fatal(err)
+	}
+	for cycle := 0; cycle < 2; cycle++ {
+		generated, err := GenerateConfig()
+		if err != nil {
+			t.Fatal(err)
+		}
+		data, err := os.ReadFile(generated)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if strings.Contains(string(data), " seg stats ") {
+			t.Fatal("regeneration restored stats")
+		}
+		if !strings.Contains(string(data), " seg crewid #{session_name})") {
+			t.Fatal("lost role control")
+		}
+		actual, err := os.ReadFile(path)
+		if err != nil || string(actual) != body {
+			t.Fatal("regeneration changed user config")
+		}
+	}
+}
+
+func TestInvalidUserLayoutDoesNotTruncateGeneratedConfig(t *testing.T) {
+	t.Setenv("XDG_CONFIG_HOME", t.TempDir())
+	dir, err := configDir()
+	if err != nil {
+		t.Fatal(err)
+	}
+	generated := filepath.Join(dir, "tmux.conf")
+	if err := os.WriteFile(generated, []byte("retain existing config"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(dir, "config.toml"), []byte("[status]\nright=['bad;command']"), 0600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := GenerateConfig(); err == nil {
+		t.Fatal("invalid layout accepted")
+	}
+	data, err := os.ReadFile(generated)
+	if err != nil || string(data) != "retain existing config" {
+		t.Fatal("invalid layout truncated prior output")
 	}
 }
