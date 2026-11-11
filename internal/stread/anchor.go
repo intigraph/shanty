@@ -26,7 +26,7 @@ func (p Plate) Empty() bool { return p.ID == "" }
 // exit. Callers must not render it as idle without corroboration; see the crew
 // state cross-check in the task segment.
 func Anchor(agent string) (Plate, error) {
-	id, err := Run("anchor", agent, "--short")
+	id, err := RunTTL(SlowTTL, "anchor", agent, "--short")
 	if err != nil {
 		return Plate{}, err
 	}
@@ -34,7 +34,7 @@ func Anchor(agent string) (Plate, error) {
 		return Plate{}, nil
 	}
 	p := Plate{ID: id}
-	full, err := Run("anchor", agent)
+	full, err := RunTTL(SlowTTL, "anchor", agent)
 	if err != nil {
 		// The id is real and already in hand; losing the title is a degraded
 		// render, not a failure. Returning the error here would throw away the

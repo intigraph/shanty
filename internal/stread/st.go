@@ -59,6 +59,14 @@ var ErrNotInstalled = errors.New("st not installed")
 // spawns are not.
 const CacheTTL = 15 * time.Second
 
+// SlowTTL is the reuse window for the plate and crew-roster reads behind the
+// task and crew segments (aegis-dnw). Each miss costs st several Quipu reads
+// (st anchor: 2 /query + 3 /watermark cold), and at 15s every bar on the host
+// re-paid that about every 16s. A minute of staleness on a status bar is still
+// invisible next to the minutes-scale changes it reports. Failures keep the
+// short CacheTTL backoff, so a broken st is retried just as soon as before.
+const SlowTTL = 60 * time.Second
+
 // searchDirs are the conventional install locations checked after PATH. This list
 // is what makes the bar survive a tmux server whose PATH is narrower than the
 // user's — see the package comment.
@@ -161,20 +169,24 @@ func workDir() string {
 // directory, and the arguments. Failures use a separate bounded backoff entry:
 // callers still receive the original output and an error, never an empty success.
 // Cache hits do not extend the deadline; expiry attempts a fresh command.
-func Run(args ...string) (string, error) {
+func Run(args ...string) (string, error) { return RunTTL(CacheTTL, args...) }
+
+// RunTTL is Run with an explicit reuse window for a successful answer. Only the
+// success entry uses ttl; the failure backoff stays CacheTTL.
+func RunTTL(ttl time.Duration, args ...string) (string, error) {
 	bin := Bin()
 	if bin == "" {
 		return "", ErrNotInstalled
 	}
 	dir := workDir()
 	key := cacheKey(bin, dir, args)
-	if raw, ok := cacheGet(key + ".failure"); ok {
+	if raw, ok := cacheGet(key+".failure", CacheTTL); ok {
 		var failure cachedFailure
 		if json.Unmarshal([]byte(raw), &failure) == nil && failure.Error != "" {
 			return failure.Output, errors.New(failure.Error)
 		}
 	}
-	if v, ok := cacheGet(key); ok {
+	if v, ok := cacheGet(key, ttl); ok {
 		return v, nil
 	}
 	val, reported := runCommand(bin, dir, args)
@@ -268,7 +280,7 @@ func cacheDir() string {
 	return filepath.Join(base, "shanty", "seg")
 }
 
-func cacheGet(key string) (string, bool) {
+func cacheGet(key string, ttl time.Duration) (string, bool) {
 	if cacheDisabled() {
 		return "", false
 	}
@@ -278,7 +290,7 @@ func cacheGet(key string) (string, bool) {
 	}
 	p := filepath.Join(dir, key)
 	fi, err := os.Stat(p)
-	if err != nil || time.Since(fi.ModTime()) > CacheTTL {
+	if err != nil || time.Since(fi.ModTime()) > ttl {
 		return "", false
 	}
 	b, err := os.ReadFile(p)
