@@ -461,7 +461,7 @@ func (Crew) Render() string {
 	if !stread.Installed() {
 		return hidden
 	}
-	count, err := stread.Run("crew", "--count")
+	count, err := stread.RunTTL(stread.SlowTTL, "crew", "--count")
 	if err != nil {
 		return loud("crew?")
 	}
