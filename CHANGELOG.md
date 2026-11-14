@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Release automation uses the built-in token and calls the tested publisher directly for bot-created tags.
+
+
 ### Added
 
 - Persistent `[status]` left/right segment choices in `config.toml`, retained
