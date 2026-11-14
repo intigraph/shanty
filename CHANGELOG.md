@@ -5,6 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0](https://github.com/intigraph/shanty/compare/v0.4.3...v0.5.0) (2026-11-14)
+
+
+### Features
+
+* **status:** persist segment choices and protect crew role ([#13](https://github.com/intigraph/shanty/issues/13)) ([285b283](https://github.com/intigraph/shanty/commit/285b283aa0c7a2950b272fc7e8e2b5598c3522db))
+
+
+### Bug Fixes
+
+* **inbox:** share status refreshes across tmux processes ([#16](https://github.com/intigraph/shanty/issues/16)) ([fcafa17](https://github.com/intigraph/shanty/commit/fcafa175a61889952f3675f1eda93f6ee3141fee))
+* **keys:** keep a prefix+s picker error on screen (display-popup -EE) ([#10](https://github.com/intigraph/shanty/issues/10)) ([4753361](https://github.com/intigraph/shanty/commit/4753361d1fec480a27a3bc1c5d7d2e7a594fc0d7))
+* **release:** use built-in token with explicit publisher handoff ([#18](https://github.com/intigraph/shanty/issues/18)) ([a3cd181](https://github.com/intigraph/shanty/commit/a3cd181e60f9c4034f7e0def7747a05292b28f95))
+
+
+### Performance Improvements
+
+* **stread:** reuse plate and crew reads for 60s on the status bar ([#17](https://github.com/intigraph/shanty/issues/17)) ([bc361eb](https://github.com/intigraph/shanty/commit/bc361eb394273b9c1782ba937bc22a8256b76cae))
+
 ## [Unreleased]
 
 ### Fixed
