@@ -26,7 +26,7 @@ func TestRenderStatusBarUsesSegmentCalls(t *testing.T) {
 		" seg mem)",
 		" seg host)",
 		" seg clock)",
-		"status-interval 5",
+		"status-interval 15",
 	}
 	for _, e := range expected {
 		if !strings.Contains(result, e) {
