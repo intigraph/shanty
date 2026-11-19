@@ -21,6 +21,7 @@ jobs:
     outputs:
       release_created: ${{ steps.release.outputs.release_created }}
       tag_name: ${{ steps.release.outputs.tag_name }}
+      pr: ${{ steps.release.outputs.pr }}
     steps:
       - id: release
         uses: googleapis/release-please-action@5c625bfb5d1ff62eadeeb3772007f7f66fdcf071 # v4
@@ -30,6 +31,29 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
+  # A release PR opened or updated with the built-in token starts no
+  # pull_request workflows, so it carried zero checks and the release lane
+  # (pr-risk) refused it as CI-dark (aegis-3a99.1). workflow_dispatch is the
+  # one event the built-in token may start: run CI on the release branch so
+  # its head commit carries native checks.
+  ci-on-release-pr:
+    needs: release-please
+    if: needs.release-please.outputs.pr != ''
+    runs-on: ubuntu-latest
+    permissions:
+      actions: write
+    steps:
+      - name: Dispatch CI on the release branch
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_JSON: ${{ needs.release-please.outputs.pr }}
+        run: |
+          branch=$(printf '%s' "$PR_JSON" | jq -r '.headBranchName // empty')
+          case "$branch" in
+            release-please--branches--main*) ;;
+            *) echo "refusing unexpected release branch: '$branch'" >&2; exit 1 ;;
+          esac
+          gh workflow run ci.yml --repo "$GITHUB_REPOSITORY" --ref "$branch"
 
   publish:
     needs: release-please
