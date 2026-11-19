@@ -42,6 +42,15 @@ func DefaultStatusBar() StatusBarConfig {
 // layout exists to show, and tmux truncates silently.
 const StatusRightLength = 200
 
+// StatusInterval is how often (seconds) tmux re-runs every `shanty seg`
+// segment. The shantytown segments each shell out to `st`, and several of
+// those read the shared Quipu store, once per attached client per tick. At 5s
+// one host's status bar issued ~53 Quipu queries a minute, about a fifth of the
+// store's busy time and a third of its 408s in a measured window (aegis-3a99.1).
+// The plate/crew reads are cached for 60s (stread.SlowTTL); 15s keeps the
+// cheap segments lively without re-asking st for unchanged answers.
+const StatusInterval = 15
+
 // RenderStatusBar generates tmux status bar configuration.
 // All segments are rendered by calling `shanty seg <name>` at status-interval.
 func RenderStatusBar(theme Theme, cfg StatusBarConfig) string {
@@ -49,7 +58,7 @@ func RenderStatusBar(theme Theme, cfg StatusBarConfig) string {
 
 	out += "# Status bar\n"
 	out += "set-option -g status on\n"
-	out += "set-option -g status-interval 5\n"
+	out += fmt.Sprintf("set-option -g status-interval %d\n", StatusInterval)
 	out += fmt.Sprintf("set-option -g status-style 'bg=%s,fg=%s'\n", theme.BG, theme.FG)
 
 	// tmux clips status-right from the left. Keep the role/verdict at the

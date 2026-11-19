@@ -92,8 +92,8 @@ func TestGenerateConfig(t *testing.T) {
 	if !strings.Contains(conf, "#(/") {
 		t.Error("expected segment calls to invoke an absolute path")
 	}
-	if !strings.Contains(conf, "status-interval 5") {
-		t.Error("expected status-interval 5")
+	if !strings.Contains(conf, "status-interval 15") {
+		t.Error("expected status-interval 15")
 	}
 
 	// Verify keybindings
