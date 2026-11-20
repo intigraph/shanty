@@ -236,11 +236,32 @@ func runCommand(bin, dir string, args []string) (string, error) {
 // installed together. It PREPENDS rather than replaces, so a deliberately
 // configured PATH still wins for anything else.
 func childEnv(bin string) []string {
+	return withBackgroundPriority(pathEnv(bin))
+}
+
+// QuipuPriorityEnv names the priority st declares to Quipu (st honors it since
+// shantytown#641: busy backoff plus an X-Quipu-Priority header, aegis-3a99.1).
+const QuipuPriorityEnv = "QUIPU_PRIORITY"
+
+// withBackgroundPriority marks every st call a status segment makes as
+// background work. A status bar is never critical, so under Quipu read pressure
+// its reads should be the first to back off or be shed. An explicit value in the
+// environment wins: an operator who sets it keeps it.
+func withBackgroundPriority(env []string) []string {
+	for _, kv := range env {
+		if name, _, ok := strings.Cut(kv, "="); ok && name == QuipuPriorityEnv {
+			return env
+		}
+	}
+	return append(env, QuipuPriorityEnv+"=background")
+}
+
+func pathEnv(bin string) []string {
+	env := os.Environ()
 	dir := filepath.Dir(bin)
 	if dir == "" || dir == "." {
-		return nil // inherit ours; nothing useful to add
+		return env // nothing useful to add to PATH
 	}
-	env := os.Environ()
 	for i, kv := range env {
 		if name, val, ok := strings.Cut(kv, "="); ok && name == "PATH" {
 			if val == dir || strings.HasPrefix(val, dir+string(os.PathListSeparator)) {

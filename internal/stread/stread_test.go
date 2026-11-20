@@ -282,6 +282,63 @@ func TestChildEnvDoesNotGrowPathOnRepeatedCalls(t *testing.T) {
 	}
 }
 
+func envValue(env []string, key string) (string, bool) {
+	for _, kv := range env {
+		if name, val, ok := strings.Cut(kv, "="); ok && name == key {
+			return val, true
+		}
+	}
+	return "", false
+}
+
+func TestChildEnvMarksStCallsBackgroundPriority(t *testing.T) {
+	// aegis-3a99.1: the status bar is never critical, so its st reads declare
+	// background priority and back off first under Quipu read pressure. This
+	// holds for an st found by path and for a bare name with no directory.
+	t.Setenv(QuipuPriorityEnv, "")
+	os.Unsetenv(QuipuPriorityEnv)
+	for _, bin := range []string{"/opt/tools/st", "st"} {
+		if got, ok := envValue(childEnv(bin), QuipuPriorityEnv); !ok || got != "background" {
+			t.Errorf("childEnv(%q) %s = %q (set %v), want background", bin, QuipuPriorityEnv, got, ok)
+		}
+	}
+}
+
+func TestChildEnvKeepsAnExplicitPriority(t *testing.T) {
+	t.Setenv(QuipuPriorityEnv, "interactive")
+	env := childEnv("/opt/tools/st")
+	if got, _ := envValue(env, QuipuPriorityEnv); got != "interactive" {
+		t.Errorf("%s = %q, want the operator's explicit value kept", QuipuPriorityEnv, got)
+	}
+	n := 0
+	for _, kv := range env {
+		if strings.HasPrefix(kv, QuipuPriorityEnv+"=") {
+			n++
+		}
+	}
+	if n != 1 {
+		t.Errorf("%d %s entries, want exactly one", n, QuipuPriorityEnv)
+	}
+}
+
+func TestStChildReceivesBackgroundPriority(t *testing.T) {
+	// End to end through the real command path: the st process itself sees it.
+	t.Setenv("SHANTY_SEG_NOCACHE", "1")
+	os.Unsetenv(QuipuPriorityEnv)
+	dir := t.TempDir()
+	fake := filepath.Join(dir, "st")
+	if err := os.WriteFile(fake, []byte("#!/bin/sh\nprintf '%s' \"$QUIPU_PRIORITY\"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	out, err := runCommand(fake, dir, []string{"anchor"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != "background" {
+		t.Errorf("st saw QUIPU_PRIORITY=%q, want background", out)
+	}
+}
+
 func TestCacheIsSharedAcrossCalls(t *testing.T) {
 	// Each `#(shanty seg …)` is its own process, so a process-local cache saved
 	// nothing and every render paid full price for every segment. The cache is on
