@@ -67,6 +67,15 @@ const CacheTTL = 15 * time.Second
 // short CacheTTL backoff, so a broken st is retried just as soon as before.
 const SlowTTL = 60 * time.Second
 
+// RosterTTL is the reuse window for `st crew --count`, the crew segment's
+// busy/total. Unlike the per-agent anchor read, every miss is a CREW-WIDE plate
+// read: one call measured 15 Quipu requests including four owner-rows pages
+// (~13k rows), and with several tmux sessions missing the shared cache on their
+// own schedules a host re-paid it about once a minute (aegis-t14). Who is busy
+// changes on the scale of tasks, not seconds, so five minutes on a status bar
+// costs nothing a reader would notice. Failures keep the short CacheTTL backoff.
+const RosterTTL = 5 * time.Minute
+
 // searchDirs are the conventional install locations checked after PATH. This list
 // is what makes the bar survive a tmux server whose PATH is narrower than the
 // user's — see the package comment.
@@ -236,7 +245,26 @@ func runCommand(bin, dir string, args []string) (string, error) {
 // installed together. It PREPENDS rather than replaces, so a deliberately
 // configured PATH still wins for anything else.
 func childEnv(bin string) []string {
-	return withBackgroundPriority(pathEnv(bin))
+	return withStatusAgent(withBackgroundPriority(pathEnv(bin)))
+}
+
+// QuipuAgentEnv names the caller st declares to Quipu. st's own default for a
+// session-less process is the producer name "shantytown", which made every
+// status bar indistinguishable from st's timers and launchers in Quipu's
+// request log (aegis-t14).
+const QuipuAgentEnv = "QUIPU_AGENT"
+
+// StatusAgent is the declared caller for status-segment st reads: attribution
+// only, never an identity or authority. An explicit QUIPU_AGENT wins.
+const StatusAgent = "shanty-status"
+
+func withStatusAgent(env []string) []string {
+	for _, kv := range env {
+		if name, val, ok := strings.Cut(kv, "="); ok && name == QuipuAgentEnv && val != "" {
+			return env
+		}
+	}
+	return append(env, QuipuAgentEnv+"="+StatusAgent)
 }
 
 // QuipuPriorityEnv names the priority st declares to Quipu (st honors it since

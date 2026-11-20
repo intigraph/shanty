@@ -339,6 +339,55 @@ func TestStChildReceivesBackgroundPriority(t *testing.T) {
 	}
 }
 
+func TestChildEnvDeclaresStatusAgent(t *testing.T) {
+	// aegis-t14: status-bar reads are attributable in Quipu's request log as
+	// their own caller, not as the generic session-less "shantytown" producer.
+	os.Unsetenv(QuipuAgentEnv)
+	if got, ok := envValue(childEnv("/opt/tools/st"), QuipuAgentEnv); !ok || got != StatusAgent {
+		t.Errorf("%s = %q (set %v), want %q", QuipuAgentEnv, got, ok, StatusAgent)
+	}
+}
+
+func TestChildEnvKeepsAnExplicitAgent(t *testing.T) {
+	t.Setenv(QuipuAgentEnv, "hammond")
+	env := childEnv("/opt/tools/st")
+	n := 0
+	for _, kv := range env {
+		if strings.HasPrefix(kv, QuipuAgentEnv+"=") {
+			n++
+			if kv != QuipuAgentEnv+"=hammond" {
+				t.Errorf("got %q, want the explicit agent kept", kv)
+			}
+		}
+	}
+	if n != 1 {
+		t.Errorf("%d %s entries, want exactly one", n, QuipuAgentEnv)
+	}
+}
+
+func TestStChildReceivesStatusAgent(t *testing.T) {
+	t.Setenv("SHANTY_SEG_NOCACHE", "1")
+	os.Unsetenv(QuipuAgentEnv)
+	dir := t.TempDir()
+	fake := filepath.Join(dir, "st")
+	if err := os.WriteFile(fake, []byte("#!/bin/sh\nprintf '%s' \"$QUIPU_AGENT\"\n"), 0o755); err != nil {
+		t.Fatal(err)
+	}
+	out, err := runCommand(fake, dir, []string{"crew", "--count"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if out != StatusAgent {
+		t.Errorf("st saw QUIPU_AGENT=%q, want %q", out, StatusAgent)
+	}
+}
+
+func TestRosterTTLOutlastsSlowTTL(t *testing.T) {
+	if RosterTTL < 300*1e9 || RosterTTL <= SlowTTL {
+		t.Errorf("RosterTTL = %v, want >= 5m and longer than SlowTTL %v", RosterTTL, SlowTTL)
+	}
+}
+
 func TestCacheIsSharedAcrossCalls(t *testing.T) {
 	// Each `#(shanty seg …)` is its own process, so a process-local cache saved
 	// nothing and every render paid full price for every segment. The cache is on
