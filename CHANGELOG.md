@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.1](https://github.com/intigraph/shanty/compare/v0.5.0...v0.5.1) (2026-11-21)
+
+
+### Bug Fixes
+
+* **stread:** stop re-reading the crew plate every minute for a title ([#25](https://github.com/intigraph/shanty/issues/25)) ([0442a37](https://github.com/intigraph/shanty/commit/0442a37d38a08220fc1b3516fc509d902e85242e))
+
 ## [Unreleased]
 
 ### Fixed
