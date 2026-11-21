@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Identity and administrator-summary status segments reuse the crew roster for
+  five minutes; interactive pickers retain their shorter freshness window.
 - Release automation uses the built-in token and calls the tested publisher directly for bot-created tags.
 - Status-bar `st` reads declare `QUIPU_AGENT=shanty-status` (unless the
   environment already sets one), so Quipu's request log can tell them from
