@@ -5,20 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+- The task segment reads the held item from `st anchor <agent> --json` (one read
+  for id, title and status) instead of pairing `--short` with the prose
+  rendering. The title can no longer belong to a previous item after a change,
+  or be a fragment of the plate summary line, and an administrator's bar no
+  longer pays for the whole crew's plate. An answer that is empty, lacks the
+  `st.task-context/1` envelope or is not valid JSON renders loud, never as an
+  empty plate.
+
 ## [0.5.1](https://github.com/intigraph/shanty/compare/v0.5.0...v0.5.1) (2026-11-21)
 
 
 ### Bug Fixes
 
 * **stread:** stop re-reading the crew plate every minute for a title ([#25](https://github.com/intigraph/shanty/issues/25)) ([0442a37](https://github.com/intigraph/shanty/commit/0442a37d38a08220fc1b3516fc509d902e85242e))
-
-## [Unreleased]
-
-### Fixed
-- The status bar no longer re-reads an administrator's whole crew plate every
-  minute: an item's title is reused while the same item is held (30 minutes at
-  most), the anchor segment reads only the id, and segment processes that miss
-  the shared cache together now send one `st` read instead of one each.
 
 ## [0.5.0](https://github.com/intigraph/shanty/compare/v0.4.3...v0.5.0) (2026-11-21)
 
