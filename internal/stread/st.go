@@ -44,6 +44,7 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 )
 
@@ -197,6 +198,22 @@ func RunTTL(ttl time.Duration, args ...string) (string, error) {
 	}
 	if v, ok := cacheGet(key, ttl); ok {
 		return v, nil
+	}
+	// Single-flight across segment processes (aegis-dh6): every segment of every
+	// tmux session is its own process, so on an expiry they all missed together
+	// and sent the same st read to Quipu in the same second. The first to take
+	// the key's lock runs st; the rest wait, then find its answer in the cache.
+	if unlock := lockKey(key); unlock != nil {
+		defer unlock()
+		if raw, ok := cacheGet(key+".failure", CacheTTL); ok {
+			var failure cachedFailure
+			if json.Unmarshal([]byte(raw), &failure) == nil && failure.Error != "" {
+				return failure.Output, errors.New(failure.Error)
+			}
+		}
+		if v, ok := cacheGet(key, ttl); ok {
+			return v, nil
+		}
 	}
 	val, reported := runCommand(bin, dir, args)
 	if reported != nil {
@@ -396,5 +413,31 @@ func cacheRemove(key string) {
 	}
 	if dir := cacheDir(); dir != "" {
 		_ = os.Remove(filepath.Join(dir, key))
+	}
+}
+
+// lockKey takes an exclusive advisory lock for one cache key and returns its
+// release, or nil when no lock could be taken. No lock means the old
+// behaviour — run st without coordination — never a failed render: a status
+// bar must not go blank because the cache directory is unwritable.
+func lockKey(key string) func() {
+	if cacheDisabled() {
+		return nil
+	}
+	dir := cacheDir()
+	if dir == "" || os.MkdirAll(dir, 0o700) != nil {
+		return nil
+	}
+	f, err := os.OpenFile(filepath.Join(dir, key+".lock"), os.O_CREATE|os.O_RDWR, 0o600)
+	if err != nil {
+		return nil
+	}
+	if syscall.Flock(int(f.Fd()), syscall.LOCK_EX) != nil {
+		f.Close()
+		return nil
+	}
+	return func() {
+		syscall.Flock(int(f.Fd()), syscall.LOCK_UN)
+		f.Close()
 	}
 }

@@ -1,6 +1,9 @@
 package stread
 
-import "strings"
+import (
+	"strings"
+	"time"
+)
 
 // Plate is what an agent currently holds, as st reports it.
 type Plate struct {
@@ -34,6 +37,17 @@ func Anchor(agent string) (Plate, error) {
 		return Plate{}, nil
 	}
 	p := Plate{ID: id}
+	// The title belongs to the item, not to the minute: reuse it for as long as
+	// the agent holds the same id (aegis-dh6). The full `st anchor` is the
+	// expensive half — for an administrator it renders the whole crew's plate,
+	// measured at 9 owner-rows Quipu reads (~15k rows) per call against 1 for
+	// --short — and the status bar used to pay it every SlowTTL for a title
+	// that had not changed.
+	titleKey := cacheKey(Bin(), workDir(), []string{"anchor-title", agent, id})
+	if raw, ok := cacheGet(titleKey, TitleTTL); ok {
+		p.Title, p.Status, _ = strings.Cut(raw, "\x00")
+		return p, nil
+	}
 	full, err := RunTTL(SlowTTL, "anchor", agent)
 	if err != nil {
 		// The id is real and already in hand; losing the title is a degraded
@@ -42,8 +56,24 @@ func Anchor(agent string) (Plate, error) {
 		return p, nil
 	}
 	p.Title, p.Status = titleFor(full, id)
+	if p.Title != "" {
+		// An unparsed title is not cached: the next SlowTTL miss may read it.
+		cacheSet(titleKey, p.Title+"\x00"+p.Status)
+	}
 	return p, nil
 }
+
+// AnchorID reads only the id the agent holds — the cheap `--short` form. A
+// segment that renders the id alone must use this, not Anchor, or it pays for
+// the full plate rendering just to throw the title away.
+func AnchorID(agent string) (string, error) {
+	return RunTTL(SlowTTL, "anchor", agent, "--short")
+}
+
+// TitleTTL bounds how long an item's title and status are reused while the
+// agent keeps holding the same id. A changed id misses at once; a retitled or
+// re-statused item shows the change within this window.
+const TitleTTL = 30 * time.Minute
 
 // titleFor pulls the title and tracker status out of st's plate line for the
 // given id. st renders it as:
