@@ -5,6 +5,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.2](https://github.com/intigraph/shanty/compare/v0.5.1...v0.5.2) (2026-11-21)
+
+
+### Bug Fixes
+
+* **stread:** read the held item from st anchor --json ([#27](https://github.com/intigraph/shanty/issues/27)) ([588225a](https://github.com/intigraph/shanty/commit/588225a8190c91816d542101522985f0794f0b93))
+
 ## [Unreleased]
 
 ### Fixed
