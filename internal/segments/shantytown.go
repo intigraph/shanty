@@ -113,7 +113,7 @@ func stateColor(cell string) string {
 
 // crewEntry reads this agent's row from `st crew`.
 func crewEntry(agent string) (stread.Entry, error) {
-	crew, err := stread.Crew()
+	crew, err := stread.DisplayCrew()
 	if err != nil {
 		return stread.Entry{}, err
 	}
@@ -319,7 +319,7 @@ const roleAdministrator = "administrator"
 // A crew read that fails here says so rather than reporting a confident zero: "no
 // crew is free" and "I could not count the crew" are opposite instructions.
 func dispatchSummary() string {
-	crew, err := stread.Crew()
+	crew, err := stread.DisplayCrew()
 	if err != nil || len(crew) == 0 {
 		return paint(colDim, "⚑ ") + loud("crew unreadable")
 	}

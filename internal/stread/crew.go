@@ -194,3 +194,13 @@ func Crew() (map[string]Entry, error) {
 	}
 	return ParseCrew(out), nil
 }
+
+// DisplayCrew shares the roster reuse window used by the crew-count segment.
+// This observation is for status segments; interactive pickers use Crew.
+func DisplayCrew() (map[string]Entry, error) {
+	out, err := RunTTL(RosterTTL, "crew")
+	if err != nil {
+		return nil, err
+	}
+	return ParseCrew(out), nil
+}
