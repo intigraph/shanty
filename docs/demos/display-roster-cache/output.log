@@ -1,0 +1,11 @@
+Script started on 2026-11-21 00:57:48-05:00 [COMMAND="go test -v ./internal/stread -run TestDisplayRosterReuseDoesNotExtendInteractiveFreshness -count=1" <not executed on terminal>]
+go: downloading github.com/BurntSushi/toml v1.6.0
+=== RUN   TestDisplayRosterReuseDoesNotExtendInteractiveFreshness
+    display_test.go:32: 60-second-old observation: display=busy (cache reused)
+    display_test.go:37: same observation: interactive=idle (producer refreshed)
+    display_test.go:48: expired observation + missing producer: error (no stale success)
+--- PASS: TestDisplayRosterReuseDoesNotExtendInteractiveFreshness (0.00s)
+PASS
+ok  	github.com/intigraph/shanty/internal/stread	0.003s
+
+Script done on 2026-11-21 00:57:50-05:00 [COMMAND_EXIT_CODE="0"]
