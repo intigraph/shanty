@@ -442,14 +442,14 @@ func (Anchor) Render() string {
 	if agent == "" {
 		return problem
 	}
-	plate, err := stread.Anchor(agent)
+	id, err := stread.AnchorID(agent)
 	if err != nil {
 		return loud("st?")
 	}
-	if plate.Empty() {
+	if id == "" {
 		return paint(colDim, "⚓ —")
 	}
-	return paint(colFG, "⚓ "+plate.ID)
+	return paint(colFG, "⚓ "+id)
 }
 
 // Crew renders the busy/total worker count.
