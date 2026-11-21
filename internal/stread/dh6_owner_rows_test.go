@@ -9,9 +9,8 @@ import (
 	"time"
 )
 
-// fakeST installs a fake st that logs each invocation's arguments and answers
-// `anchor X --short` with the id in $SHANTY_TEST_ID and `anchor X` with a plate.
-func fakeST(t *testing.T, body string) (calls func(substr string) int) {
+// fakeST installs a fake st that logs each invocation's arguments.
+func fakeST(t *testing.T, body string) (calls func(args string) int) {
 	t.Helper()
 	d := t.TempDir()
 	log := filepath.Join(d, "calls")
@@ -25,11 +24,11 @@ func fakeST(t *testing.T, body string) (calls func(substr string) int) {
 	t.Setenv("XDG_CACHE_HOME", d)
 	ResetBinForTest()
 	t.Cleanup(ResetBinForTest)
-	return func(substr string) int {
+	return func(args string) int {
 		b, _ := os.ReadFile(log)
 		n := 0
 		for _, line := range strings.Split(strings.TrimSpace(string(b)), "\n") {
-			if line == substr {
+			if line == args {
 				n++
 			}
 		}
@@ -37,9 +36,16 @@ func fakeST(t *testing.T, body string) (calls func(substr string) int) {
 	}
 }
 
-const plateST = `case "$*" in
-  "anchor boss --short") echo "$SHANTY_TEST_ID" ;;
-  "anchor boss") printf 'You are boss\n  ▶ %s  The held item title   (in_progress)\n' "$SHANTY_TEST_ID" ;;
+// The held item comes from $SHANTY_TEST_ID; any other anchor form is refused so
+// a test fails if the bar falls back to the expensive prose rendering.
+const jsonST = `case "$*" in
+  "anchor boss --json")
+    if [ -n "$SHANTY_TEST_ID" ]; then
+      printf '{"schema":"st.task-context/1","agent":"boss","item":{"id":"%s","title":"Title of %s","status":"in_progress","priority":0}}\n' "$SHANTY_TEST_ID" "$SHANTY_TEST_ID"
+    else
+      printf '{"schema":"st.task-context/1","agent":"boss","item":null}\n'
+    fi ;;
+  *) echo "unexpected st call: $*" >&2; exit 9 ;;
 esac
 `
 
@@ -52,48 +58,47 @@ func ageKey(t *testing.T, args []string, by time.Duration) {
 	}
 }
 
-// aegis-dh6: the full anchor (9 owner-rows reads for an administrator) runs
-// once per held item, not once per SlowTTL.
-func TestAnchorTitleReusedWhileTheSameItemIsHeld(t *testing.T) {
-	calls := fakeST(t, plateST)
+// aegis-dh6: one --json read gives id, title and status; the prose anchor
+// (9 owner-rows reads for an administrator) is never run.
+func TestAnchorReadsIDTitleAndStatusFromOneJSONRead(t *testing.T) {
+	calls := fakeST(t, jsonST)
 	t.Setenv("SHANTY_TEST_ID", "aegis-1")
 	p, err := Anchor("boss")
-	if err != nil || p.ID != "aegis-1" || p.Title != "The held item title" || p.Status != "in_progress" {
-		t.Fatalf("first read %+v %v", p, err)
+	if err != nil || p.ID != "aegis-1" || p.Title != "Title of aegis-1" || p.Status != "in_progress" {
+		t.Fatalf("read %+v %v", p, err)
 	}
-	// Both st answers expire (past SlowTTL), the item is unchanged.
-	ageKey(t, []string{"anchor", "boss", "--short"}, SlowTTL+time.Second)
-	ageKey(t, []string{"anchor", "boss"}, SlowTTL+time.Second)
-	p, err = Anchor("boss")
-	if err != nil || p.Title != "The held item title" || p.Status != "in_progress" {
-		t.Fatalf("reused read %+v %v", p, err)
+	id, err := AnchorID("boss")
+	if err != nil || id != "aegis-1" {
+		t.Fatalf("AnchorID %q %v", id, err)
 	}
-	if calls("anchor boss --short") != 2 || calls("anchor boss") != 1 {
-		t.Fatalf("short=%d full=%d, want short=2 full=1", calls("anchor boss --short"), calls("anchor boss"))
-	}
-	// A new item misses the title at once.
-	t.Setenv("SHANTY_TEST_ID", "aegis-2")
-	ageKey(t, []string{"anchor", "boss", "--short"}, SlowTTL+time.Second)
-	p, _ = Anchor("boss")
-	if p.ID != "aegis-2" || calls("anchor boss") != 2 {
-		t.Fatalf("changed item %+v full=%d", p, calls("anchor boss"))
-	}
-	// Past TitleTTL the same item's title is read again.
-	ageKey(t, []string{"anchor-title", "boss", "aegis-2"}, TitleTTL+time.Second)
-	ageKey(t, []string{"anchor", "boss", "--short"}, SlowTTL+time.Second)
-	ageKey(t, []string{"anchor", "boss"}, SlowTTL+time.Second)
-	Anchor("boss")
-	if calls("anchor boss") != 3 {
-		t.Fatalf("title must expire at TitleTTL: full=%d", calls("anchor boss"))
+	if calls("anchor boss --json") != 1 {
+		t.Fatalf("anchor + id segments must share one read: calls=%d", calls("anchor boss --json"))
 	}
 }
 
-func TestAnchorIDNeverRunsTheFullPlate(t *testing.T) {
-	calls := fakeST(t, plateST)
+// The P2 from the #25 review: after an item change the title must never be
+// the previous item's (or a fragment of another line) while the id is new.
+func TestItemChangeMovesIDAndTitleTogether(t *testing.T) {
+	fakeST(t, jsonST)
 	t.Setenv("SHANTY_TEST_ID", "aegis-1")
-	id, err := AnchorID("boss")
-	if err != nil || id != "aegis-1" || calls("anchor boss") != 0 {
-		t.Fatalf("id=%q err=%v full=%d", id, err, calls("anchor boss"))
+	Anchor("boss")
+	t.Setenv("SHANTY_TEST_ID", "aegis-2")
+	ageKey(t, []string{"anchor", "boss", "--json"}, SlowTTL+time.Second)
+	p, err := Anchor("boss")
+	if err != nil || p.ID != "aegis-2" || p.Title != "Title of aegis-2" {
+		t.Fatalf("after item change %+v %v", p, err)
+	}
+}
+
+func TestNullItemIsAnEmptyPlateAndBadJSONIsLoud(t *testing.T) {
+	fakeST(t, jsonST)
+	t.Setenv("SHANTY_TEST_ID", "")
+	if p, err := Anchor("boss"); err != nil || !p.Empty() {
+		t.Fatalf("null item %+v %v", p, err)
+	}
+	fakeST(t, "echo 'not json'\n")
+	if _, err := Anchor("boss"); err == nil {
+		t.Fatal("an unreadable answer must be an error, never an empty plate")
 	}
 }
 

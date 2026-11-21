@@ -105,11 +105,8 @@ const busyCrew = "  villiers    worker    up   current  busy    st-villiers"
 
 func TestTaskRendersAHeldItem(t *testing.T) {
 	fakeST(t, map[string]string{
-		"anchor villiers --short": "ss-5x22f",
-		"anchor villiers": "  You are villiers — worker, reports to moneypenny.\n" +
-			"\n  ON YOUR PLATE\n" +
-			"    ▶ ss-5x22f  status display: missing stats and crew name        (in_progress)\n",
-		"crew": busyCrew,
+		"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":{"id":"ss-5x22f","title":"status display: missing stats and crew name","status":"in_progress","priority":1}}`,
+		"crew":                   busyCrew,
 	})
 	got := plain(Task{}.Render())
 	if !strings.Contains(got, "ss-5x22f") {
@@ -128,8 +125,8 @@ func TestTaskRendersAnIdleAgentWithAnEmptyPlate(t *testing.T) {
 	// it gets words — an empty segment here would be indistinguishable from the bar
 	// being broken.
 	fakeST(t, map[string]string{
-		"anchor villiers --short": "",
-		"crew":                    "  villiers    worker    up   current  idle    st-villiers",
+		"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":null}`,
+		"crew":                   "  villiers    worker    up   current  idle    st-villiers",
 	})
 	got := plain(Task{}.Render())
 	if got == "" {
@@ -149,8 +146,8 @@ func TestTaskIsLoudWhenABusyAgentsPlateCannotBeRead(t *testing.T) {
 	// blank — consistently, silently, and looking exactly like an idle agent.
 	// Cross-checking st's own verdict turns it into a visible contradiction.
 	fakeST(t, map[string]string{
-		"anchor villiers --short": "",
-		"crew":                    busyCrew,
+		"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":null}`,
+		"crew":                   busyCrew,
 	})
 	got := plain(Task{}.Render())
 	if !strings.Contains(got, "⚠") {
@@ -167,23 +164,22 @@ func TestTheThreePlateRenderingsAreDistinct(t *testing.T) {
 	renders := map[string]string{}
 	t.Run("held", func(t *testing.T) {
 		fakeST(t, map[string]string{
-			"anchor villiers --short": "ss-1",
-			"anchor villiers":         "  ON YOUR PLATE\n    ▶ ss-1  a real item        (open)\n",
-			"crew":                    busyCrew,
+			"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":{"id":"ss-1","title":"a real item","status":"open","priority":2}}`,
+			"crew":                   busyCrew,
 		})
 		renders["held"] = plain(Task{}.Render())
 	})
 	t.Run("idle", func(t *testing.T) {
 		fakeST(t, map[string]string{
-			"anchor villiers --short": "",
-			"crew":                    "  villiers    worker    up   current  idle    st-villiers",
+			"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":null}`,
+			"crew":                   "  villiers    worker    up   current  idle    st-villiers",
 		})
 		renders["idle"] = plain(Task{}.Render())
 	})
 	t.Run("unreadable", func(t *testing.T) {
 		fakeST(t, map[string]string{
-			"anchor villiers --short": "",
-			"crew":                    busyCrew,
+			"anchor villiers --json": `{"schema":"st.task-context/1","agent":"villiers","item":null}`,
+			"crew":                   busyCrew,
 		})
 		renders["unreadable"] = plain(Task{}.Render())
 	})
@@ -365,7 +361,7 @@ func TestAdministratorHoldingNothingIsNotAFault(t *testing.T) {
 	// produces a red that is known-false every time it is drawn, and a status surface
 	// carrying one permanent false red teaches its reader to discount every red on it.
 	fakeST(t, map[string]string{
-		"anchor moneypenny --short": "",
+		"anchor moneypenny --json": `{"schema":"st.task-context/1","agent":"moneypenny","item":null}`,
 		"crew": "  moneypenny  administrator  up  current  busy  st-moneypenny\n" +
 			"  bond        worker         up  current  idle  st-bond\n" +
 			"  q           worker         up  current  busy  st-q",
@@ -400,8 +396,8 @@ func TestAdministratorRuleIsKeyedOnRoleNotName(t *testing.T) {
 		{"worker", true, "worker with no item while busy: real signal, stay loud"},
 	} {
 		fakeST(t, map[string]string{
-			"anchor moneypenny --short": "",
-			"crew":                      "  moneypenny  " + tc.role + "  up  current  busy  st-moneypenny",
+			"anchor moneypenny --json": `{"schema":"st.task-context/1","agent":"moneypenny","item":null}`,
+			"crew":                     "  moneypenny  " + tc.role + "  up  current  busy  st-moneypenny",
 		})
 		t.Setenv("SHANTY_AGENT", "moneypenny")
 		got := plain(Task{}.Render())
@@ -417,7 +413,7 @@ func TestAdministratorSummaryCountsIdleWithLiveWorkSeparately(t *testing.T) {
 	// counting it as free is the single number that most often makes a dispatch
 	// decision wrong.
 	fakeST(t, map[string]string{
-		"anchor moneypenny --short": "",
+		"anchor moneypenny --json": `{"schema":"st.task-context/1","agent":"moneypenny","item":null}`,
 		"crew": "  moneypenny  administrator  up  current  busy      st-moneypenny\n" +
 			"  bond        worker         up  current  idle      st-bond\n" +
 			"  q           worker         up  current  idle+1sh  st-q\n" +

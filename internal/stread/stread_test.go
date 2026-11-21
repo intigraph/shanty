@@ -80,34 +80,6 @@ func TestBusy(t *testing.T) {
 	}
 }
 
-func TestTitleForReadsThePlateLine(t *testing.T) {
-	full := `
-  You are villiers — worker, reports to moneypenny.
-
-  ON YOUR PLATE
-    ▶ ss-5x22f  status display: missing stats, crew name, task summary        (in_progress)
-
-  YOUR LEAD
-    moneypenny (administrator) — up. Your stop events go to them.
-`
-	title, status := titleFor(full, "ss-5x22f")
-	if want := "status display: missing stats, crew name, task summary"; title != want {
-		t.Errorf("title = %q, want %q", title, want)
-	}
-	if status != "in_progress" {
-		t.Errorf("status = %q, want in_progress", status)
-	}
-}
-
-func TestTitleForGivesUpQuietly(t *testing.T) {
-	// A layout we cannot read costs the TITLE, never the identity: the id came from
-	// the machine-readable --short flag, so the segment still shows something true.
-	title, status := titleFor("  ON YOUR PLATE\n    nothing. `st go <item> <you>`\n", "ss-5x22f")
-	if title != "" || status != "" {
-		t.Errorf("titleFor on an empty plate = (%q, %q), want empty", title, status)
-	}
-}
-
 func TestParseStatsReadsTheAgentRow(t *testing.T) {
 	out := `st stats — last 24h
   villiers       events=412    files=17  stops=6    tokens_in=180000 tokens_out=42000

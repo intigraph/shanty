@@ -8,6 +8,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- The task segment reads the held item from `st anchor <agent> --json` (one read
+  for id, title and status) instead of pairing `--short` with the prose
+  rendering. The title can no longer belong to a previous item after a change,
+  or be a fragment of the plate summary line, and an administrator's bar no
+  longer pays for the whole crew's plate.
 - The status bar no longer re-reads an administrator's whole crew plate every
   minute: an item's title is reused while the same item is held (30 minutes at
   most), the anchor segment reads only the id, and segment processes that miss
