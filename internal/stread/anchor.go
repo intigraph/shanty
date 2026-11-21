@@ -18,12 +18,18 @@ func (p Plate) Empty() bool { return p.ID == "" }
 // taskContext is the part of `st anchor <agent> --json` (schema
 // st.task-context/1) the bar reads: the plate item, or null.
 type taskContext struct {
-	Item *struct {
-		ID     string `json:"id"`
-		Title  string `json:"title"`
-		Status string `json:"status"`
-	} `json:"item"`
+	Schema string          `json:"schema"`
+	Item   json.RawMessage `json:"item"`
 }
+
+type plateItem struct {
+	ID     string `json:"id"`
+	Title  string `json:"title"`
+	Status string `json:"status"`
+}
+
+// TaskContextSchema is the only `st anchor --json` envelope the bar accepts.
+const TaskContextSchema = "st.task-context/1"
 
 // Anchor reads what the named agent is holding, from ONE machine-readable read.
 //
@@ -46,19 +52,41 @@ func Anchor(agent string) (Plate, error) {
 	if err != nil {
 		return Plate{}, err
 	}
+	return parseTaskContext(agent, out)
+}
+
+// parseTaskContext fails closed. An empty answer, a missing or different
+// schema, a missing "item" key, or anything that is not valid JSON is st we
+// cannot read, which the segments render loud — never an empty plate. Only an
+// explicit `"item": null` inside a valid envelope means st named no item.
+func parseTaskContext(agent, out string) (Plate, error) {
+	bad := func(why string) (Plate, error) {
+		return Plate{}, fmt.Errorf("st anchor %s --json: unreadable answer: %s", agent, why)
+	}
 	if out == "" {
-		return Plate{}, nil
+		return bad("empty output")
 	}
 	var ctx taskContext
 	if err := json.Unmarshal([]byte(out), &ctx); err != nil {
-		// st answered, but not in the documented shape: that is st we cannot
-		// read, which the segments render loud, never as an empty plate.
-		return Plate{}, fmt.Errorf("st anchor %s --json: unreadable answer: %w", agent, err)
+		return bad(err.Error())
 	}
-	if ctx.Item == nil {
+	if ctx.Schema != TaskContextSchema {
+		return bad(fmt.Sprintf("schema %q, want %q", ctx.Schema, TaskContextSchema))
+	}
+	if len(ctx.Item) == 0 {
+		return bad("no item field")
+	}
+	if string(ctx.Item) == "null" {
 		return Plate{}, nil
 	}
-	return Plate{ID: ctx.Item.ID, Title: ctx.Item.Title, Status: ctx.Item.Status}, nil
+	var item plateItem
+	if err := json.Unmarshal(ctx.Item, &item); err != nil {
+		return bad("item: " + err.Error())
+	}
+	if item.ID == "" {
+		return bad("item without an id")
+	}
+	return Plate{ID: item.ID, Title: item.Title, Status: item.Status}, nil
 }
 
 // AnchorID reads only the id the agent holds. It shares Anchor's cached answer,

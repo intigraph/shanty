@@ -120,3 +120,32 @@ func TestConcurrentMissesSingleFlight(t *testing.T) {
 		t.Fatalf("8 concurrent misses ran st %d times, want 1", n)
 	}
 }
+
+// Review P2 on #27: fail closed. Only a schema-valid envelope with an explicit
+// item (or explicit null) is an answer; everything else is loud.
+func TestTaskContextFailsClosed(t *testing.T) {
+	const env = `{"schema":"st.task-context/1","agent":"a",`
+	for name, out := range map[string]string{
+		"empty":         "",
+		"bare null":     "null",
+		"empty object":  "{}",
+		"no schema":     `{"agent":"a","item":null}`,
+		"wrong schema":  `{"schema":"st.task-context/2","agent":"a","item":null}`,
+		"no item field": `{"schema":"st.task-context/1","agent":"a"}`,
+		"invalid json":  "not json",
+		"item not obj":  env + `"item":"aegis-1"}`,
+		"item no id":    env + `"item":{"title":"t"}}`,
+		"array":         "[]",
+	} {
+		if p, err := parseTaskContext("a", out); err == nil {
+			t.Errorf("%s: accepted as %+v, want a loud error", name, p)
+		}
+	}
+	if p, err := parseTaskContext("a", env+`"item":null}`); err != nil || !p.Empty() {
+		t.Errorf("explicit null item: %+v %v, want empty plate", p, err)
+	}
+	p, err := parseTaskContext("a", env+`"item":{"id":"aegis-1","title":"T","status":"open","priority":1}}`)
+	if err != nil || p.ID != "aegis-1" || p.Title != "T" || p.Status != "open" {
+		t.Errorf("valid item: %+v %v", p, err)
+	}
+}
